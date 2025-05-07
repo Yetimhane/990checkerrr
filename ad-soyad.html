@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ad Soyad Sorgu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    #background-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      min-width: 100%;
+      min-height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    .container {
+      color: rgb(0, 0, 0);
+      text-align: center;
+      padding-top: 100px;
+    }
+
+    form {
+      margin-bottom: 20px;
+    }
+
+    input {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 5px;
+  border: 2px solid #ff00ff;
+  background-color: black;
+  color: #ffb3ff;
+  font-size: 16px;
+  width: 220px;
+  text-align: center;
+  outline: none;
+  box-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
+  transition: box-shadow 0.3s ease;
+}
+
+input::placeholder {
+  color: #ff66cc;
+  opacity: 0.8;
+}
+
+input:focus {
+  box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+  border-color: #ff00ff;
+}
+    button {
+      padding: 10px 20px;
+      border: none;
+      background-color: #ff00ff;
+      color: black;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+    }
+
+    .results {
+      margin-top: 20px;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      border-radius: 10px;
+      width: 80%;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+    }
+
+    .results div {
+      margin: 5px 0;
+      border-bottom: 1px solid #555;
+      padding-bottom: 5px;
+    }
+    * {
+  font-family: 'Orbitron', sans-serif;
+}
+
+/* Genel yazı stili (neon efekti) */
+body, h1, h2, h3, h4, h5, h6, p, div, span, a, input, button {
+  color: #ffb3ff;
+  text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+}
+
+  </style>
+</head>
+<body>
+
+  <!-- Arka Plan Video -->
+  <video autoplay muted loop id="background-video">
+    <source src="sorguplan.mp4" type="video/mp4" />
+  </video>
+
+  <div class="container">
+    <h1>Ad Soyad Sorgulama</h1>
+    <form id="sorguForm">
+      <input type="text" id="ad" placeholder="Ad" required />
+      <input type="text" id="soyad" placeholder="Soyad" required />
+      <button type="submit">Sorgula</button>
+    </form>
+
+    <div class="results" id="sonuclar"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('sorguForm');
+    const sonuclarDiv = document.getElementById('sonuclar');
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const ad = document.getElementById('ad').value.trim();
+      const soyad = document.getElementById('soyad').value.trim();
+
+      if (!ad || !soyad) return;
+
+      sonuclarDiv.innerHTML = "Sorgulanıyor...";
+
+      try {
+        const proxy = "https://corsproxy.io/?";
+        const apiUrl = `https://api.sowixfree.xyz/sowixapi/adsoyadilice.php?ad=${encodeURIComponent(ad)}&soyad=${encodeURIComponent(soyad)}`;
+        const fullUrl = proxy + apiUrl;
+
+        const response = await fetch(fullUrl);
+        const result = await response.json();
+
+        console.log("Gelen veri:", result);
+
+        // Sadece `data` alanını kullan
+        const data = result.data;
+
+        if (Array.isArray(data) && data.length > 0) {
+  sonuclarDiv.innerHTML = `<p><strong>${data.length}</strong> sonuç bulundu:</p>`;
+  data.forEach((item, index) => {
+    const div = document.createElement("div");
+    div.classList.add("temiz-sonuc");
+    div.style.marginBottom = "20px";
+    div.style.border = "1px solid #ff00ff";
+    div.style.padding = "10px";
+    div.style.borderRadius = "8px";
+
+    const detaylar = `<h3>Kişi #${index + 1}</h3>` +
+      Object.entries(item).map(([key, value]) => {
+        return `<strong>${key}:</strong> ${value || "Tanımsız"}<br>`;
+      }).join('');
+
+    div.innerHTML = detaylar;
+    sonuclarDiv.appendChild(div);
+  });
+} else {
+          sonuclarDiv.innerHTML = "Sonuç bulunamadı.";
+        }
+
+      } catch (error) {
+        sonuclarDiv.innerHTML = "Bir hata oluştu.";
+        console.error("Hata:", error);
+      }
+    });
+  </script>
+
+</body>
+</html>

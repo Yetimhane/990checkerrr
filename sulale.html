@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sülale Bilgisi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: white;
+      text-align: center;
+      background-color: black;
+    }
+
+    #background-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      min-width: 100%;
+      min-height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    .container {
+      padding-top: 100px;
+    }
+
+    input {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 5px;
+  border: 2px solid #ff00ff;
+  background-color: black;
+  color: #ffb3ff;
+  font-size: 16px;
+  width: 220px;
+  text-align: center;
+  outline: none;
+  box-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
+  transition: box-shadow 0.3s ease;
+}
+
+input::placeholder {
+  color: #ff66cc;
+  opacity: 0.8;
+}
+
+input:focus {
+  box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+  border-color: #ff00ff;
+}
+    button {
+      padding: 10px 20px;
+      border: none;
+      background-color: #ff00ff;
+      color: black;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+    }
+
+
+    .results {
+      margin-top: 20px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    .results div {
+      margin-bottom: 8px;
+      border-bottom: 1px solid #444;
+      padding-bottom: 5px;
+      text-align: left;
+    }
+    * {
+  font-family: 'Orbitron', sans-serif;
+}
+
+/* Genel yazı stili (neon efekti) */
+body, h1, h2, h3, h4, h5, h6, p, div, span, a, input, button {
+  color: #ffb3ff;
+  text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+}
+  </style>
+</head>
+<body>
+
+<video autoplay muted loop id="background-video">
+  <source src="sorguplan.mp4" type="video/mp4" />
+</video>
+
+<div class="container">
+  <h1>Sülale Bilgisi Sorgu</h1>
+  <form id="sorguForm">
+    <input type="text" id="tc" placeholder="TC Kimlik No" maxlength="11" required />
+    <button type="submit">Sorgula</button>
+  </form>
+  <div class="results" id="sonuclar"></div>
+</div>
+
+<script>
+  const form = document.getElementById('sorguForm');
+  const sonuclarDiv = document.getElementById('sonuclar');
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const tc = document.getElementById('tc').value.trim();
+
+    if (!/^\d{11}$/.test(tc)) {
+      sonuclarDiv.innerHTML = "Geçerli bir TC girin.";
+      return;
+    }
+
+    sonuclarDiv.innerHTML = "Sorgulanıyor...";
+
+    try {
+      const proxy = "https://corsproxy.io/?";
+      const apiUrl = `http://api.sowixfree.xyz/sowixapi/sulale.php?tc=${tc}`;
+      const response = await fetch(proxy + apiUrl);
+      const result = await response.json();
+
+      if (Array.isArray(result) && result.length > 0) {
+        sonuclarDiv.innerHTML = "";
+        result.forEach(kisi => {
+          const div = document.createElement("div");
+
+          const detaylar = Object.entries(kisi).map(([key, value]) => {
+            return `<strong>${key}:</strong> ${value ?? "Tanımsız"}<br>`;
+          }).join('');
+
+          div.innerHTML = detaylar;
+          sonuclarDiv.appendChild(div);
+        });
+      } else {
+        sonuclarDiv.innerHTML = "Sülale bilgisi bulunamadı.";
+      }
+    } catch (err) {
+      console.error(err);
+      sonuclarDiv.innerHTML = "Bir hata oluştu.";
+    }
+  });
+</script>
+
+</body>
+</html>
